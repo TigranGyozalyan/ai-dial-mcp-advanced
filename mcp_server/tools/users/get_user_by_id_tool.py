@@ -3,31 +3,44 @@ from typing import Any
 from mcp_server.tools.users.base import BaseUserServiceTool
 
 
-class GetUserByIdTool(BaseUserServiceTool):
+class SearchUsersTool(BaseUserServiceTool):
 
     @property
     def name(self) -> str:
-        return 'get_user_by_id'
+        return 'search_users'
 
     @property
     def description(self) -> str:
-        return 'get user information based on their ID'
+        return 'search users based either their name, surname, email or gender'
 
     @property
     def input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "number",
-                    "description": "ID of the user to get"
-                }
+                "name": {
+                    "type": "string",
+                    "description": "User name"
+                },
+                "surname": {
+                    "type": "string",
+                    "description": "User surname"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "User email"
+                },
+                "gender": {
+                    "type": "string",
+                    "description": "User gender",
+                    "enum": [
+                        "male",
+                        "female"
+                    ],
+                },
             },
-            "required": [
-                "id"
-            ]
+            "required": []
         }
 
     async def execute(self, arguments: dict[str, Any]) -> str:
-        user_id = int(arguments['id'])
-        return await self._user_client.get_user(user_id)
+        return await self._user_client.search_users(**arguments)
