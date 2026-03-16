@@ -1,46 +1,40 @@
 from typing import Any
 
+
+from mcp_server.models.user_info import UserUpdate
 from mcp_server.tools.users.base import BaseUserServiceTool
 
 
-class SearchUsersTool(BaseUserServiceTool):
+class UpdateUserTool(BaseUserServiceTool):
 
     @property
     def name(self) -> str:
-        return 'search_users'
+        return 'update_user'
 
     @property
     def description(self) -> str:
-        return 'search users based either their name, surname, email or gender'
+        return 'update information of a user with given id with new information from the request'
 
     @property
     def input_schema(self) -> dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "User name"
+                "id": {
+                    "type": "number",
+                    "description": "ID of the user to delete"
                 },
-                "surname": {
-                    "type": "string",
-                    "description": "User surname"
-                },
-                "email": {
-                    "type": "string",
-                    "description": "User email"
-                },
-                "gender": {
-                    "type": "string",
-                    "description": "User gender",
-                    "enum": [
-                        "male",
-                        "female"
-                    ],
-                },
+                "new_info": UserUpdate.model_json_schema()
             },
-            "required": []
+            "required": [
+                "id"
+            ]
         }
 
     async def execute(self, arguments: dict[str, Any]) -> str:
-        return await self._user_client.search_users(**arguments)
+        user_id = int(arguments['id'])
+
+        UserUpdate.model_validate(arguments)
+        user = UserUpdate(**arguments['new_info'])
+        return await self._user_client.update_user(user_id, user)
+
